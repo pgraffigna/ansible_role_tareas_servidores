@@ -1,0 +1,18 @@
+---
+# paquetes
+paquetes: openssh-server
+
+# telegram
+telegram_token: TOKEN
+telegram_chat_id: CHAT_ID
+
+# discos
+capacidad: 100
+
+# correo
+smtp_server: SMTP_SERVER
+smtp_user: SMTP_USER
+smtp_password: SMTP_PASS
+smtp_from: SMTP_FROM
+lista_correos: [ 'MAIL1', 'MAIL2' ]
+

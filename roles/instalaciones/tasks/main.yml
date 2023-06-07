@@ -1,0 +1,23 @@
+---
+- include_vars: ../../vars_main.yml
+
+- name: Actualizando cache
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instalar "{{ paquetes }}"
+  apt:
+    name: "{{ paquetes }}"
+    state: present
+  register: ssh_installation
+
+- name: Enviar notificación a Telegram
+  uri:
+    url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
+    method: POST
+    body:
+      chat_id: "{{ telegram_chat_id }}"
+      text: "La instalación de {{ paquetes }} en el equipo {{ inventory_hostname }} se ha completado correctamente."
+    body_format: json
+  when: ssh_installation.changed

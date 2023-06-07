@@ -1,0 +1,20 @@
+---
+- include_vars: ../../vars_main.yml
+
+- name: Obtener información del espacio en disco
+  command: df -h --output=avail /
+  register: disk_space
+
+- name: Filtrar porcentaje de uso del disco
+  set_fact:
+    disk_usage: "{{ disk_space.stdout_lines[1].split()[0] }}"
+
+- name: Enviar notificación a Telegram si al disco le queda menos de {{ capacidad }}GB de espacio
+  uri:
+    url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
+    method: POST
+    body:
+      chat_id: "{{ telegram_chat_id }}"
+      text: "Al disco del servidor {{ inventory_hostname }} le quedan menos de {{ capacidad }}GB de uso."
+    body_format: json
+  when: disk_usage | int <= 100

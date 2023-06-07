@@ -1,0 +1,10 @@
+---
+- hosts: testing
+  gather_facts: true
+  become: true
+
+  roles:
+    - instalaciones
+    - notificaciones
+    - mantenimiento
+    - docker

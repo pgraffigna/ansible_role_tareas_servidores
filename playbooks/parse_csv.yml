@@ -1,0 +1,14 @@
+---
+- hosts: testing
+  #become: true
+
+  tasks:
+   - name: parseando el csv
+     read_csv:
+      path: regiones.csv
+     register: lista_regiones
+     delegate_to: localhost # la tarea se corre en el equipo local
+
+   - name: mostrar resultado
+     debug:
+      var: lista_regiones.list

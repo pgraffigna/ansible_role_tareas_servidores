@@ -1,0 +1,38 @@
+---
+- include_vars: ../../vars_main.yml
+
+- name: Actualizando e instalando docker + docker-compose
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    cache_valid_time: true
+  with_items: "{{ docker_packages }}"  
+  register: docker_installation  
+
+- name: agregando usuario a grupo
+  shell: "usermod -aG docker {{ ansible_env.SUDO_USER }}"
+  when: ansible_env.SUDO_USER != 'root'
+
+- name: Reset ssh connection for changes to take effect
+  meta: "reset_connection"
+
+- name: install python package manager
+  apt:
+    name: python3-pip
+
+- name: install python sdk
+  become_user: "{{ ansible_env.SUDO_USER }}"
+  pip:
+    name:
+      - docker
+      - docker-compose
+
+- name: Enviar notificación a Telegram
+  uri:
+    url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
+    method: POST
+    body:
+      chat_id: "{{ telegram_chat_id }}"
+      text: "La instalación de {{ docker_packages }} en el equipo {{ inventory_hostname }} se ha completado correctamente."
+    body_format: json
+  when: docker_installation.changed

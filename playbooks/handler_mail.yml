@@ -1,0 +1,43 @@
+---
+- hosts: testing
+  become: true
+  gather_facts: false
+  
+  tasks:
+    - name: Cargar variables desde archivo externo
+      include_vars:
+        file: ../vars_main.yml
+
+    - name: Instalando apache2
+      apt:
+        name: apache2
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: reiniciar apache
+      service:
+        name: apache2
+        state: restarted
+      notify: notificacion
+
+  handlers:
+    - name: notificacion
+      mail:
+        host: "{{ smtp_server }}"
+        port: 587
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_password }}"
+        from: "{{ smtp_from }}"
+        to: "{{ item }}"
+        subject: << Reporte Admins >>
+        body: |
+          Reiniciamos el servicio Apache en los siguientes servidores:
+          {% for item in ansible_play_hosts_all %}
+          - {{ item }}
+          {% endfor %}
+        headers: 'Reply-To=emisor|X-Special="No es SPAM"'
+        charset: utf8
+      with_items: "{{ lista_correos }}"
+     
+

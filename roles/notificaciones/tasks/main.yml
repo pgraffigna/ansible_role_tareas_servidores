@@ -1,0 +1,17 @@
+---
+- include_vars: ../../vars_main.yml
+
+- name: Verificar si se requiere reinicio
+  shell: grep -q "Reboot required" /var/run/reboot-required
+  register: reboot_required
+  changed_when: false
+
+- name: Enviar notificación a Telegram si el servidor necesita reinicio
+  uri:
+    url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
+    method: POST
+    body:
+      chat_id: "{{ telegram_chat_id }}"
+      text: "El servidor {{ inventory_hostname }} necesita reiniciarse."
+    body_format: json
+  when: reboot_required.rc == 0
