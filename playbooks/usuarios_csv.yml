@@ -1,0 +1,34 @@
+---
+- hosts: testing
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Copiar lista de usuarios
+      ansible.builtin.copy:
+        src: "users.csv"
+        dest: "/home/{{ ansible_user }}/"
+
+    - name: Registrar los datos
+      ansible.builtin.read_csv:
+        path: "/home/{{ ansible_user }}/users.csv"
+      register: users
+
+    - name: Crear los grupos
+      ansible.builtin.group:
+        name: "{{ item.grupo }}"
+        state: present
+      loop: "{{ users.list }}"
+
+    - name: Crear los usuarios
+      ansible.builtin.user:
+        name: "{{ item.usuario }}"
+        groups: "{{ item.grupo }}"
+        append: true
+        shell: "/bin/bash"
+        password: "{{ item.password | password_hash('sha512') }}"
+        #comment: "{{ item.nombre }} {{ item.apellido }}"
+        update_password: on_create
+      loop: "{{ users.list }}"
+
+

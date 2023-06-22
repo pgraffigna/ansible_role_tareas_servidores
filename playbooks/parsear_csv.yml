@@ -1,6 +1,5 @@
 ---
 - hosts: testing
-  #become: true
 
   tasks:
    - name: parseando el csv

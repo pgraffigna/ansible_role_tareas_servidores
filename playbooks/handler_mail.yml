@@ -2,7 +2,7 @@
 - hosts: testing
   become: true
   gather_facts: false
-  
+
   tasks:
     - name: Cargar variables desde archivo externo
       include_vars:
@@ -39,5 +39,4 @@
         headers: 'Reply-To=emisor|X-Special="No es SPAM"'
         charset: utf8
       with_items: "{{ lista_correos }}"
-     
 
