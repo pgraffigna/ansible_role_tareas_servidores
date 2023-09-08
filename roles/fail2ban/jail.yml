@@ -1,0 +1,37 @@
+---
+- name: Configurar Fail2ban
+  hosts: testing-fail
+  become: true
+
+  tasks:
+    - name: Instalar fail2ban
+      ansible.builtin.package:
+        name: fail2ban
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Verificar si el archivo jail.local existe
+      ansible.builtin.stat:
+        path: /etc/fail2ban/jail.local
+      register: jail_local
+
+    - name: Realizar una copia de seguridad de jail.local si existe
+      ansible.builtin.copy:
+        src: /etc/fail2ban/jail.local
+        dest: /etc/fail2ban/jail.local.backup
+        mode: '0644'
+        remote_src: true
+      when: jail_local.stat.exists
+
+    - name: Copiar archivo de configuracion con jails
+      ansible.builtin.template:
+        src: jail.local.j2
+        dest: /etc/fail2ban/jail.local
+        mode: '0644'
+      when: not jail_local.stat.exists
+
+    - name: Reiniciar el servicio Fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
+        enabled: true

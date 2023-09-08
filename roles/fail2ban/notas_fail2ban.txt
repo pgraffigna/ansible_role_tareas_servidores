@@ -1,0 +1,13 @@
+[opciones]
+filter = apache-auth  ; Nombre del filtro para el análisis de los registros
+logpath = %(apache_error_log)s  ; Ruta a los archivos de registro de acceso de Apache
+maxretry = 3  ; Número máximo de intentos fallidos antes de bloquear
+findtime = 600 ; Ventana de tiempo en segundos para contar intentos fallidos
+bantime = 3600  ; Tiempo de bloqueo en segundos (1 hora en este caso)
+ignoreip = 127.0.0.1 ::1
+
+[cli]
+systemctl restart fail2ban
+fail2ban-client set sshd unbanip "IP"
+fail2ban-client status ;lista jails activos
+fail2ban-client status sshd ;info de jails

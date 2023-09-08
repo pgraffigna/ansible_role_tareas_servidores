@@ -1,0 +1,96 @@
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+banaction = iptables-multiport[name=NoSSHAuthFailures, port="http,https", "blocktype=DROP]
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+maxretry = 3
+findtime = 30
+bantime = 30
+ignoreip = 127.0.0.1
+
+[apache-auth]
+enabled = true
+port = http,https
+filter = apache-auth
+banaction = iptables-multiport[name=NoAuthFailures, port="http,https", blocktype=DROP]
+logpath = %(apache_error_log)s
+maxretry = 3
+findtime = 30
+bantime = 30
+ignoreip = 127.0.0.1
+
+[nginx-auth]
+enabled = true
+port = http,https
+filter = nginx-http-auth
+banaction = iptables-multiport[name=NoAuthFailures, port="http,https", blocktype=DROP ]
+logpath = %(nginx_access_log)s
+maxretry = 3
+findtime = 30
+bantime = 30
+ignoreip = 127.0.0.1
+
+[nginx-basic-auth]
+enabled = true
+port = http,https
+filter = nginx-basic-auth ;custom
+action = iptables-multiport[name=NoBasicAuthFailures, port="http,https", blocktype=DROP]
+logpath = %(nginx_error_log)s
+bantime = 600
+maxretry = 6
+ignoreip = 127.0.0.1
+
+[nginx-login-auth]
+enabled = true
+port = http,https
+filter = nginx-login ;custom
+action = iptables-multiport[name=NoLoginFailures, port="http,https", blocktype=DROP]
+logpath = %(nginx_access_log)s
+bantime = 600
+maxretry = 6
+ignoreip = 127.0.0.1
+
+[nginx-req-limit-cultura]
+enabled = true
+port = http,https
+filter = nginx-limit-req
+action = iptables-multiport[name=NginxReqLimit, port="http,https", blocktype=DROP ]
+logpath = %(nginx_access_log)s
+maxretry = 10
+findtime = 60
+bantime = 3600
+ignoreip = 127.0.0.1
+
+[nginx-wp-login]
+enabled = true
+port = http,https
+filter = nginx-wp-login ;custom
+logpath = /var/log/nginx/access*_log
+maxretry = 3
+findtime = 120
+bantime = 1200
+ignoreip = 127.0.0.1
+
+;/etc/fail2ban/filter.d/nginx-request-limit-cultura.conf
+;[Definition]
+;failregex =  ^<HOST>.*"(GET|POST|HEAD).*" (403|404|429) .*$
+;ignoreregex =
+
+;/etc/fail2ban/filter.d/nginx-basic-auth.conf
+;[Definition]
+;failregex = no user/password was provided for basic authentication.*client: <host>
+            user .* was not found in.*client: <host>
+            user .* password mismatch.*client: <host>
+;ignoreregex =
+
+;/etc/fail2ban/filter.d/nginx-login-auth.conf
+;[Definition]
+;failregex = ^<host> -.*POST /sessions HTTP/1\.." 200
+;ignoreregex =
+
+;/etc/fail2ban/filter.d/nginx-wp-login.conf
+;[Definition]
+;failregex = .*] “POST /wp-login.php HTTP/.*” 200
+;ignoreregex =
