@@ -4,31 +4,35 @@
   gather_facts: true
 
   tasks:
-    - name: Copiar lista de usuarios
-      ansible.builtin.copy:
-        src: "users.csv"
-        dest: "/home/{{ ansible_user }}/"
+    - name: Parsear el CSV para extraer los datos de los usuarios
+      community.general.read_csv:
+        path: usuarios.csv
+      register: datos_usuarios
 
-    - name: Registrar los datos
-      ansible.builtin.read_csv:
-        path: "/home/{{ ansible_user }}/users.csv"
-      register: users
+    - name: Parsear el CSV para extraer los datos de los grupos
+      community.general.read_csv:
+        path: grupos.csv
+      register: datos_grupos
 
-    - name: Crear los grupos
+    - name: Crea los grupos
       ansible.builtin.group:
-        name: "{{ item.grupo }}"
+        name: "{{ item.nombre }}"
         state: present
-      loop: "{{ users.list }}"
+      loop: "{{ datos_grupos.list }}"
 
-    - name: Crear los usuarios
+    - name: Crea los usuarios
       ansible.builtin.user:
-        name: "{{ item.usuario }}"
-        groups: "{{ item.grupo }}"
-        append: true
-        shell: "/bin/bash"
+        name: "{{ item.nombre }}"
+        create_home: false
         password: "{{ item.password | password_hash('sha512') }}"
-        #comment: "{{ item.nombre }} {{ item.apellido }}"
+        shell: "/bin/false"
+        groups: "{{ item.grupo }}"
         update_password: on_create
-      loop: "{{ users.list }}"
+      loop: "{{ datos_usuarios.list }}"
 
+    - name: Crea los usuarios para samba
+      shell: "printf '{{ item.password }}\n{{ item.password }}\n' | smbpasswd -s -a {{ item.nombre }}"
+      loop: "{{ datos_usuarios.list }}"
 
+# ansible-galaxy collection install community.general
+# funciona solo en localhost
