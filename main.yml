@@ -4,7 +4,9 @@
   become: true
 
   roles:
-    - instalaciones
-    - notificaciones
-    - mantenimiento
-    - docker
+    # - instalaciones
+    # - notificaciones
+    # - mantenimiento
+    # - docker
+    # - fail2ban
+    - actualizaciones
